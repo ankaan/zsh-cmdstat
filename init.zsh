@@ -27,24 +27,31 @@ function _zsh_cmdstat_collect() {
 function _zsh_cmdstat_display() {
     _zsh_cmdstat_status=$?
     if [[ -n $_zsh_cmdstat_cmd && -n $_zsh_cmdstat_time ]]; then
-        local now diff timeout last_status
+        local now diff timeout last_status color
 
         now=$(date "+%s")
         last_status=$_zsh_cmdstat_status
 
+        # Use extended color pallete if available.
+        if [[ $TERM = *256color* || $TERM = *rxvt* || $(tput colors) = 256 ]]; then
+            color=241
+        else
+            color=8
+        fi
+
         zstyle -s ':cmdstat:' command-complete-timeout timeout \
             || timeout=5
-        zstyle -s ':cmdstat:' always-on-error always_on_error \
-            || always_on_error=yes
-        zstyle -s ':cmdstat:' bell bell \
-            || bell=no
 
         secs=$(( $now - $_zsh_cmdstat_time ))
-        if [[ $always_on_error == "yes" && $last_status -gt "0" ]] || (( secs >= $timeout )); then
-            [[ $bell != no ]] && echo -ne "\a"
+        if ( zstyle -T ':cmdstat:' always-on-error && [[ $last_status -gt "0" ]] ) || (( secs >= $timeout )); then
+            zstyle -t ':cmdstat:' bell && echo -ne "\a"
+            zstyle -T ':cmdstat:' color && echo -ne "\e[38;5;${color}m"
+
             printf '[exit %s] [time %s]\n' \
                 "$last_status" \
                 "$(_zsh_cmdstat_displaytime $secs)"
+
+            zstyle -T ':cmdstat:' color && echo -ne "\e[0m"
         fi
     fi
     unset _zsh_cmdstat_cmd _zsh_cmdstat_time _zsh_cmdstat_status

@@ -18,7 +18,7 @@ antigen bundle ankaan/zsh-cmdstat
 Settings
 --------
 
-By default the information is printed if a command was running for at least 5 second or it exited with an error code.
+By default the information is printed if a command was running for at least 5 second or it exited with an error code. Colors are used.
 
 To change the time before the output is printed, use:
 
@@ -36,6 +36,12 @@ To activate a terminal bell when the information is printed, use:
 
 ```sh
 zstyle ':cmdstat:*' bell 'yes'
+```
+
+To disable colors, use:
+
+```sh
+zstyle ':cmdstat:*' color 'no'
 ```
 
 Authors
